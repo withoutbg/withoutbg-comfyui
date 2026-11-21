@@ -2156,7 +2156,7 @@ wheels = [
 
 [[package]]
 name = "withoutbg"
-version = "1.5.1"
+version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -2172,14 +2172,14 @@ dependencies = [
     { name = "requests" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8e/10/353fa85ce566be6e2c675db1e6cba15e7a937e47654422ad31cfe9e435d3/withoutbg-1.5.1.tar.gz", hash = "sha256:1bd4ae8c46f7601fea837c6986195e00d1117e94c52ab0f32b2c04a7449dcdb6", size = 313498, upload-time = "2026-11-21T16:14:30.689Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a7/a3/3c804614116e52bb619fa0a54aa27f9ce94da47db1f68ba26217418bfa26/withoutbg-1.6.0.tar.gz", hash = "sha256:e6ad2329afd76256fdea8fc7a0da48115acfb9b54886579304f2e0113cf8660c", size = 316788, upload-time = "2026-11-21T20:11:20.319Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2f/95/49f3751a42b341a2e0e3b8bcff9382acfc7b6bacfd1d2d3c3b1abd0beff6/withoutbg-1.5.1-py3-none-any.whl", hash = "sha256:58ab4db6bff3778efcd880aa715b3e3fda56ad41f15c457e886b69f472848a32", size = 39798, upload-time = "2026-11-21T16:14:29.067Z" },
+    { url = "https://files.pythonhosted.org/packages/bd/b2/86183da60f6cedf5437c37cb142afb7d7144dac96b9b7e6aa346e7e0b406/withoutbg-1.6.0-py3-none-any.whl", hash = "sha256:6747b11002e763ba14bcaa91c5afc11e6b32c795f7aba890c0555acef8c931ce", size = 41823, upload-time = "2026-11-21T20:11:19.01Z" },
 ]
 
 [[package]]
 name = "withoutbg-comfyui"
-version = "0.1.0"
+version = "0.2.0"
 source = { virtual = "." }
 dependencies = [
     { name = "withoutbg" },
@@ -2194,7 +2194,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "withoutbg", specifier = ">=1.5.1" }]
+requires-dist = [{ name = "withoutbg", specifier = ">=1.6.0" }]
 
 [package.metadata.requires-dev]
 dev = [
