@@ -48,7 +48,9 @@ def test_download_failure_has_actionable_message(monkeypatch):
     model = FakeModel(fail_on="b.onnx")
     monkeypatch.setattr(backends, "_get_open_weights", lambda: model)
     monkeypatch.setattr(backends, "_missing_bundle_files", lambda: ["a.onnx", "b.onnx"])
-    with pytest.raises(backends.BackendError, match=r"(?s)b\.onnx.*WITHOUTBG_MODEL_PATH"):
+    with pytest.raises(
+        backends.BackendError, match=r"(?s)b\.onnx.*WITHOUTBG_MODEL_PATH"
+    ):
         backends.ensure_open_weights()
 
 

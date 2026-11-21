@@ -67,7 +67,9 @@ def test_open_weights_downloads_before_first_frame(monkeypatch):
         backends, "ensure_open_weights", lambda progress=None: order.append("dl")
     )
     monkeypatch.setattr(
-        backends, "remove_open_weights", lambda pil: order.append("run") or _fake_result(pil)
+        backends,
+        "remove_open_weights",
+        lambda pil: order.append("run") or _fake_result(pil),
     )
     WithoutBGRemoveBackground().run(torch.rand(2, 4, 4, 3), "open_weights")
     assert order == ["dl", "run", "run"]
