@@ -1,0 +1,41 @@
+[project]
+name = "withoutbg-comfyui"
+description = "ComfyUI node for withoutBG background removal: open weights (local, free) or Pro (Cloud API)."
+version = "0.1.0"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["comfyui", "background-removal", "alpha-matte", "onnx"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = ["withoutbg>=1.5.0"]
+
+[dependency-groups]
+dev = ["pytest>=8", "torch", "ruff>=0.6"]
+
+[project.urls]
+Repository = "https://github.com/withoutbg/withoutbg-comfyui"
+"Bug Reports" = "https://github.com/withoutbg/withoutbg-comfyui/issues"
+
+[tool.comfy]
+PublisherId = "withoutbg"
+DisplayName = "withoutBG"
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]  # ruff format owns line length
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E402"]  # imports follow pytest.importorskip("torch")
