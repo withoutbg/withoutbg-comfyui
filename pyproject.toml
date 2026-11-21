@@ -23,6 +23,7 @@ Repository = "https://github.com/withoutbg/withoutbg-comfyui"
 [tool.comfy]
 PublisherId = "withoutbg"
 DisplayName = "withoutBG"
+Icon = "https://raw.githubusercontent.com/withoutbg/withoutbg-comfyui/main/images/icon.png"
 
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib"
