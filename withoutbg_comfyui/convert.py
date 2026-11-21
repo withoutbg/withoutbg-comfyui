@@ -52,3 +52,25 @@ def compose_rgba(frame, alpha: np.ndarray) -> np.ndarray:
     if arr.shape[-1] == 1:
         arr = np.repeat(arr, 3, axis=-1)
     return np.concatenate([arr[..., :3], alpha[..., None]], axis=-1)
+
+
+def parse_color(text: str) -> tuple[float, float, float]:
+    """``#RRGGBB`` / ``RRGGBB`` / ``#RGB`` to floats in 0..1. Raises ValueError."""
+    h = text.strip().lstrip("#")
+    if len(h) == 3:
+        h = "".join(c * 2 for c in h)
+    if len(h) != 6:
+        raise ValueError(f"Color {text!r} is not a hex value like #00FF00")
+    try:
+        r, g, b = (int(h[i : i + 2], 16) for i in (0, 2, 4))
+    except ValueError:
+        raise ValueError(f"Color {text!r} is not a hex value like #00FF00") from None
+    return r / 255.0, g / 255.0, b / 255.0
+
+
+def composite_rgb(frame, alpha: np.ndarray, color: tuple[float, float, float]):
+    """Original RGB over a solid ``color`` as float32 ``[H, W, 3]``."""
+    rgba = compose_rgba(frame, alpha)
+    bg = np.asarray(color, dtype=np.float32)
+    a = rgba[..., 3:4]
+    return (rgba[..., :3] * a + bg * (1.0 - a)).astype(np.float32)

@@ -1,22 +1,23 @@
 [project]
 name = "withoutbg-comfyui"
 description = "ComfyUI node for withoutBG background removal: open weights (local, free) or Pro (Cloud API)."
-version = "0.1.0"
+version = "0.2.0"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 readme = "README.md"
 requires-python = ">=3.10"
-keywords = ["comfyui", "background-removal", "alpha-matte", "onnx"]
+keywords = ["comfyui", "background-removal", "alpha-matte", "matting", "onnx"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-dependencies = ["withoutbg>=1.5.1"]
+dependencies = ["withoutbg>=1.6.0"]
 
 [dependency-groups]
 dev = ["pytest>=8", "torch", "ruff>=0.6"]
 
 [project.urls]
+Homepage = "https://withoutbg.com?utm_source=pypi&utm_medium=listing&utm_campaign=open-weights-v4&utm_content=withoutbg-comfyui-home"
 Repository = "https://github.com/withoutbg/withoutbg-comfyui"
 "Bug Reports" = "https://github.com/withoutbg/withoutbg-comfyui/issues"
 
@@ -24,6 +25,7 @@ Repository = "https://github.com/withoutbg/withoutbg-comfyui"
 PublisherId = "withoutbg"
 DisplayName = "withoutBG"
 Icon = "https://raw.githubusercontent.com/withoutbg/withoutbg-comfyui/main/images/icon.png"
+Banner = "https://raw.githubusercontent.com/withoutbg/withoutbg-comfyui/main/images/banner.png"
 
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib"

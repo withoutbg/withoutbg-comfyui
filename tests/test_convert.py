@@ -34,3 +34,14 @@ def test_compose_rgba_keeps_input_colours():
     assert out.shape == (5, 7, 4)
     np.testing.assert_array_equal(out[..., :3], frame.numpy())
     assert np.all(out[..., 3] == 0.25)
+
+
+def test_parse_color_forms():
+    from withoutbg_comfyui.convert import parse_color
+
+    assert parse_color("#FF0000") == (1.0, 0.0, 0.0)
+    assert parse_color("0f0") == (0.0, 1.0, 0.0)
+    with pytest.raises(ValueError):
+        parse_color("#12")
+    with pytest.raises(ValueError):
+        parse_color("#GGGGGG")

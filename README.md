@@ -1,5 +1,7 @@
 # withoutbg-comfyui
 
+[![Comfy Registry](https://img.shields.io/badge/Comfy%20Registry-withoutbg--comfyui-6c2bd9)](https://registry.comfy.org/publishers/withoutbg/nodes/withoutbg-comfyui)
+
 ComfyUI node for [withoutBG](https://withoutbg.com?utm_source=github&utm_medium=readme&utm_campaign=open-weights-v4&utm_content=withoutbg-comfyui-home) background removal. Run the open weights model locally (free) or opt in to Pro through the Cloud API.
 
 ![withoutBG Remove Background in a ComfyUI workflow: Load Image, the node, and Preview Image and Preview Mask outputs](https://raw.githubusercontent.com/withoutbg/withoutbg-comfyui/main/images/comfyui.png)
@@ -10,11 +12,17 @@ ComfyUI node for [withoutBG](https://withoutbg.com?utm_source=github&utm_medium=
 |---|---|---|
 | ![](sample-results/open-weights/example1.png) | ![](sample-results/open-weights/example2.png) | ![](sample-results/open-weights/example3.png) |
 
+## Why this node
+
+Most background removers give a hard cut. withoutBG predicts a soft alpha matte, so hair, glass, smoke and soap bubbles keep their partial transparency and sit naturally on a new background. The open weights run on your machine (CPU, or an NVIDIA GPU when available), nothing is uploaded, and there is no per-image cost. Pro (Cloud API) is optional.
+
+See how it compares on [the benchmark page](https://withoutbg.com/compare?utm_source=github&utm_medium=readme&utm_campaign=open-weights-v4&utm_content=withoutbg-comfyui-compare).
+
 ## Install
 
-**ComfyUI-Manager** (after the first registry release): search `withoutBG`.
+**ComfyUI-Manager**: search `withoutBG`.
 
-**comfy-cli** (after the first registry release): `comfy node install withoutbg-comfyui`.
+**comfy-cli**: `comfy node install withoutbg-comfyui`
 
 **Manual** (with [uv](https://docs.astral.sh/uv/)):
 
@@ -29,25 +37,48 @@ No uv? `pip install -r withoutbg-comfyui/requirements.txt` with ComfyUI's Python
 
 Restart ComfyUI. The node is under **image / withoutBG**.
 
+## Example workflows
+
+Open **Workflow → Browse Templates → withoutbg-comfyui**:
+
+| Template | What it does |
+|---|---|
+| `remove_background` | Photo in, transparent PNG out, plus a mask preview |
+| `replace_background` | Cut out a subject and composite it over a new background through the soft mask |
+| `green_screen_video` | Cut out every frame of a clip onto solid green (or any colour) |
+
 ## Node: withoutBG Remove Background
 
 | Input | |
 |---|---|
 | `image` | IMAGE, any batch size |
 | `engine` | `open_weights` (default, local, free) or `pro` (Cloud API) |
+| `device` | `auto` (default) uses an NVIDIA GPU or DirectML when available, else CPU. `cpu` forces CPU. Open weights only |
+| `background` | `alpha` (default): RGBA with transparency. `white`, `black` or `color`: 3-channel RGB on a solid colour, for nodes that expect 3 channels (VAE Encode, upscalers) |
+| `color` | Hex colour such as `#00FF00`, used when `background` is `color` |
 
 | Output | |
 |---|---|
-| `image` | RGBA. Original colours plus the matte as alpha. Save with **Save Image** for a transparent PNG |
+| `image` | Original colours plus the matte as alpha (RGBA), or on a solid colour (RGB) when `background` is not `alpha`. Save RGBA with **Save Image** for a transparent PNG |
 | `mask` | The alpha matte, foreground = 1 |
 
-An example workflow is in `example_workflows/`.
+Workflows saved with version 0.1 keep working: the new inputs sit after `engine` and have defaults.
 
 ### Open weights
 
 The first run downloads the model from Hugging Face (`withoutbg/withoutbg-openweights-onnx`) into the Hugging Face cache: 4 files, about 1.5 GB. The node shows a progress bar (one step per file) and prints each file in the ComfyUI console. ComfyUI otherwise looks idle until the download finishes. Later runs use the local copy and work offline.
 
-To use files you downloaded yourself, set `WITHOUTBG_MODEL_PATH` to the `.onnx` file; the other bundle files must sit in the same folder. Runs on CPU.
+### GPU
+
+`device = auto` picks an NVIDIA GPU when ONNX Runtime can see one. The default `onnxruntime` package is CPU only, so swap it in ComfyUI's Python:
+
+```bash
+uv pip uninstall onnxruntime && uv pip install onnxruntime-gpu
+```
+
+When the GPU is used, the ComfyUI console prints `withoutBG: open weights running on CUDAExecutionProvider`. If the GPU fails at run time the node logs one warning and continues on CPU. Without a GPU build the node runs on CPU as before.
+
+To use files you downloaded yourself, set `WITHOUTBG_MODEL_PATH` to the `.onnx` file; the other bundle files must sit in the same folder.
 
 ### Pro (optional)
 
@@ -74,7 +105,8 @@ Avoid `launchctl setenv` on macOS: it exposes the key to every app until you reb
 
 - **OpenCV conflict:** `withoutbg` depends on `opencv-python-headless`. If ComfyUI already has `opencv-python`, the installer may add both. If `import cv2` breaks, reinstall one: `uv pip uninstall opencv-python opencv-python-headless && uv pip install opencv-python-headless` (or the same with `pip`, adding `-y` to uninstall).
 - **Download fails with 401 or "Repository Not Found":** an expired Hugging Face login can cause this even though the model is public. Update `withoutbg` (`uv pip install -U withoutbg`) or run `hf auth logout`.
-- **onnxruntime:** the package needs `onnxruntime`. Environments with `onnxruntime-gpu` keep working; the model still runs on CPU.
+- **onnxruntime vs onnxruntime-gpu:** install only one of them in ComfyUI's Python. Having both can hide the GPU build; uninstall both, then install the one you want.
+- **Not using the GPU:** run `python -c "import onnxruntime; print(onnxruntime.get_available_providers())"` in ComfyUI's Python. If `CUDAExecutionProvider` is missing, you have the CPU build.
 
 ## Development
 

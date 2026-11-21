@@ -14,6 +14,9 @@ from PIL import Image
 from .__version__ import __version__
 
 _ENGINES = ("open_weights", "pro")
+_DEVICES = ("auto", "cpu")
+BACKGROUNDS = ("alpha", "white", "black", "color")
+_CPU = "CPUExecutionProvider"
 _KEY_URL = "https://withoutbg.com/account?utm_source=comfyui&utm_medium=plugin&utm_campaign=open-weights-v4&utm_content=withoutbg-comfyui-api-key"
 
 log = logging.getLogger("withoutbg_comfyui")
@@ -28,9 +31,10 @@ _BUNDLE_FILES = (
     "birefnet-general.onnx",
 )
 
-_open_weights = None
+_open_weights: dict[tuple[str, ...], object] = {}
 _open_weights_lock = threading.Lock()
 _download_lock = threading.Lock()
+_gpu_failed = False  # set once a GPU session fails; later runs stay on CPU
 
 
 class BackendError(RuntimeError):
@@ -57,14 +61,38 @@ def _comfy_version() -> str | None:
         return None
 
 
-def _get_open_weights():
-    global _open_weights
+def pick_providers(device: str = "auto") -> list[str]:
+    """ONNX Runtime providers for ``device``: GPU first on ``auto``, CPU last."""
+    if device not in _DEVICES:
+        raise BackendError(f"Unknown device {device!r}; use one of {_DEVICES}.")
+    if device == "cpu" or _gpu_failed:
+        return [_CPU]
+    try:
+        import onnxruntime as ort
+    except ImportError:
+        return [_CPU]
+    available = set(ort.get_available_providers())
+    chosen = [
+        p for p in ("CUDAExecutionProvider", "DmlExecutionProvider") if p in available
+    ]
+    if "CUDAExecutionProvider" in chosen and hasattr(ort, "preload_dlls"):
+        try:  # reuse the CUDA / cuDNN libraries that ComfyUI's torch ships
+            ort.preload_dlls()
+        except Exception as e:  # best effort
+            log.debug("withoutBG: onnxruntime.preload_dlls failed: %s", e)
+    return chosen[:1] or [_CPU]
+
+
+def _get_open_weights(device: str = "auto"):
+    providers = pick_providers(device)
+    key = tuple(providers)
     with _open_weights_lock:
-        if _open_weights is None:
+        if key not in _open_weights:
             from withoutbg import WithoutBG
 
-            _open_weights = WithoutBG.open_weights()
-        return _open_weights
+            _open_weights[key] = WithoutBG.open_weights(providers=providers)
+            log.info("withoutBG: open weights running on %s", providers[0])
+        return _open_weights[key]
 
 
 def _missing_bundle_files() -> list[str]:
@@ -83,7 +111,7 @@ def _missing_bundle_files() -> list[str]:
     ]
 
 
-def ensure_open_weights(progress=None) -> int:
+def ensure_open_weights(progress=None, device: str = "auto") -> int:
     """Download any missing model files up front, logging each one.
 
     ``progress(done, total)`` is called with ``done=0`` before the first file and
@@ -94,7 +122,7 @@ def ensure_open_weights(progress=None) -> int:
         missing = _missing_bundle_files()
         if not missing:
             return 0
-        model = _get_open_weights().model
+        model = _get_open_weights(device).model
         total = len(missing)
         log.info(
             "withoutBG: downloading the open weights model from Hugging Face "
@@ -124,11 +152,26 @@ def ensure_open_weights(progress=None) -> int:
         return total
 
 
-def remove_open_weights(image: Image.Image) -> Image.Image:
-    """Alpha matte for ``image`` from the open weights model (RGBA out)."""
+def remove_open_weights(image: Image.Image, device: str = "auto") -> Image.Image:
+    """Alpha matte for ``image`` from the open weights model (RGBA out).
+
+    If a GPU provider fails, warn once and rerun on CPU for the rest of the session.
+    """
+    global _gpu_failed
     try:
-        return _get_open_weights().remove_background(image)
+        return _get_open_weights(device).remove_background(image)
     except Exception as e:  # SDK raises WithoutBGError; keep message
+        if pick_providers(device) == [_CPU]:
+            raise BackendError(f"withoutBG open weights failed: {e}") from e
+        log.warning(
+            "withoutBG: GPU run failed (%s); falling back to CPU for this session. "
+            "Set device to cpu to silence this.",
+            e,
+        )
+        _gpu_failed = True
+    try:
+        return _get_open_weights(device).remove_background(image)
+    except Exception as e:
         raise BackendError(f"withoutBG open weights failed: {e}") from e
 
 
@@ -167,6 +210,12 @@ def remove_pro(client, image: Image.Image) -> Image.Image:
         return client.remove_background(image)
     except Exception as e:
         raise BackendError(_api_message(e)) from e
+
+
+def validate_device(device: str) -> str:
+    if device not in _DEVICES:
+        raise BackendError(f"Unknown device {device!r}; use one of {_DEVICES}.")
+    return device
 
 
 def validate_engine(engine: str) -> str:

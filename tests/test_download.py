@@ -21,7 +21,7 @@ class FakeModel:
 @pytest.fixture
 def fake(monkeypatch):
     model = FakeModel()
-    monkeypatch.setattr(backends, "_get_open_weights", lambda: model)
+    monkeypatch.setattr(backends, "_get_open_weights", lambda device="auto": model)
     return model
 
 
@@ -46,7 +46,7 @@ def test_downloads_missing_files_logs_and_reports_progress(monkeypatch, fake, ca
 
 def test_download_failure_has_actionable_message(monkeypatch):
     model = FakeModel(fail_on="b.onnx")
-    monkeypatch.setattr(backends, "_get_open_weights", lambda: model)
+    monkeypatch.setattr(backends, "_get_open_weights", lambda device="auto": model)
     monkeypatch.setattr(backends, "_missing_bundle_files", lambda: ["a.onnx", "b.onnx"])
     with pytest.raises(
         backends.BackendError, match=r"(?s)b\.onnx.*WITHOUTBG_MODEL_PATH"

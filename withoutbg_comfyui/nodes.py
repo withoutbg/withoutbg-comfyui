@@ -5,7 +5,13 @@ from __future__ import annotations
 import numpy as np
 
 from . import backends
-from .convert import alpha_to_array, compose_rgba, frame_to_pil
+from .convert import (
+    alpha_to_array,
+    compose_rgba,
+    composite_rgb,
+    frame_to_pil,
+    parse_color,
+)
 
 
 def _progress_bar(total: int):
@@ -33,21 +39,52 @@ class WithoutBGRemoveBackground:
     RETURN_NAMES = ("image", "mask")
     DESCRIPTION = (
         "Remove the background with withoutBG. Open weights run locally and are "
-        "free; Pro uses the Cloud API (opt-in, key from WITHOUTBG_API_KEY, "
-        "1 credit per image)."
+        "free (GPU used when available); Pro uses the Cloud API (opt-in, key "
+        "from WITHOUTBG_API_KEY, 1 credit per image). Output is RGBA by default, "
+        "or RGB on a solid colour for nodes that need 3 channels."
     )
 
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": ("IMAGE",),
-                "engine": (list(backends._ENGINES), {"default": "open_weights"}),
+                "image": ("IMAGE", {"tooltip": "Images to cut out (any batch size)."}),
+                "engine": (
+                    list(backends._ENGINES),
+                    {
+                        "default": "open_weights",
+                        "tooltip": "open_weights: local and free. pro: Cloud "
+                        "API, 1 credit per image, needs WITHOUTBG_API_KEY.",
+                    },
+                ),
+                "device": (
+                    list(backends._DEVICES),
+                    {
+                        "default": "auto",
+                        "tooltip": "open_weights only. auto uses an NVIDIA GPU "
+                        "(onnxruntime-gpu) or DirectML when available, else CPU.",
+                    },
+                ),
+                "background": (
+                    list(backends.BACKGROUNDS),
+                    {
+                        "default": "alpha",
+                        "tooltip": "alpha: RGBA with transparency. Others: 3-channel "
+                        "RGB on a solid colour (for VAE Encode, upscalers).",
+                    },
+                ),
+                "color": (
+                    "STRING",
+                    {
+                        "default": "#00FF00",
+                        "tooltip": "Hex colour, used when background is 'color'.",
+                    },
+                ),
             },
         }
 
     @staticmethod
-    def _ensure_model() -> None:
+    def _ensure_model(device: str = "auto") -> None:
         """First-run download with a progress bar (one step per model file)."""
         state: dict = {"bar": None, "done": 0}
 
@@ -58,15 +95,35 @@ class WithoutBGRemoveBackground:
                 state["bar"].update(done - state["done"])
             state["done"] = done
 
-        backends.ensure_open_weights(progress)
+        backends.ensure_open_weights(progress, device)
 
-    def run(self, image, engine):
+    @staticmethod
+    def _fill(background: str, color: str):
+        """None for transparent RGBA, else an RGB triple in 0..1."""
+        if background == "alpha":
+            return None
+        if background == "white":
+            return (1.0, 1.0, 1.0)
+        if background == "black":
+            return (0.0, 0.0, 0.0)
+        if background == "color":
+            try:
+                return parse_color(color)
+            except ValueError as e:
+                raise backends.BackendError(str(e)) from e
+        raise backends.BackendError(
+            f"Unknown background {background!r}; use one of {backends.BACKGROUNDS}."
+        )
+
+    def run(self, image, engine, device="auto", background="alpha", color="#00FF00"):
         import torch
 
         backends.validate_engine(engine)
+        backends.validate_device(device)
+        fill = self._fill(background, color)
         client = backends.make_pro_client() if engine == "pro" else None
         if client is None:
-            self._ensure_model()
+            self._ensure_model(device)
 
         count = image.shape[0]
         bar = _progress_bar(count)
@@ -78,10 +135,14 @@ class WithoutBGRemoveBackground:
             result = (
                 backends.remove_pro(client, pil)
                 if client is not None
-                else backends.remove_open_weights(pil)
+                else backends.remove_open_weights(pil, device)
             )
             alpha = alpha_to_array(result, pil.size)
-            rgba.append(compose_rgba(frame, alpha))
+            rgba.append(
+                compose_rgba(frame, alpha)
+                if fill is None
+                else composite_rgb(frame, alpha, fill)
+            )
             masks.append(alpha)
             if bar is not None:
                 bar.update(1)
