@@ -8,6 +8,18 @@ ComfyUI node for [withoutBG](https://withoutbg.com?utm_source=github&utm_medium=
 
 ## See the results
 
+Fine hair at 2x zoom, same crop and background in every panel. withoutBG keeps the thin strands translucent; the others turn them into dark, blotchy outlines.
+
+![Crop of windblown hair: original, withoutBG, BiRefNet general and rembg isnet-general-use on the same teal background](https://raw.githubusercontent.com/withoutbg/withoutbg-comfyui/main/images/edge-zoom.jpg)
+
+Four real photos chosen for hard edges (hair, fur, soap bubbles, powder cloud), with the alpha MAE against ground truth printed on each cell (lower is better). The photos come from Open BG Removal Bench v0 (60 photos); these four are a selection, not an average. Full results: [withoutbg.com/compare](https://withoutbg.com/compare?utm_source=github&utm_medium=readme&utm_campaign=open-weights-v4&utm_content=withoutbg-comfyui-compare).
+
+![Comparison grid: original, withoutBG, BiRefNet general, rembg isnet-general-use and rembg u2net on four photos](https://raw.githubusercontent.com/withoutbg/withoutbg-comfyui/main/images/comparison-grid.jpg)
+
+Photos: Niko Tsviliov, Alvan Nee, Alexander Dummer, Vinicius Wiesehofer, via Unsplash.
+
+More examples (original, cutout, mask):
+
 | | | |
 |---|---|---|
 | ![](sample-results/open-weights/example1.png) | ![](sample-results/open-weights/example2.png) | ![](sample-results/open-weights/example3.png) |
