@@ -2,6 +2,8 @@
 
 ComfyUI node for [withoutBG](https://withoutbg.com?utm_source=github&utm_medium=readme&utm_campaign=open-weights-v4&utm_content=withoutbg-comfyui-home) background removal. Run the open weights model locally (free) or opt in to Pro through the Cloud API.
 
+![withoutBG Remove Background in a ComfyUI workflow: Load Image, the node, and Preview Image and Preview Mask outputs](https://raw.githubusercontent.com/withoutbg/withoutbg-comfyui/main/images/comfyui.png)
+
 ## See the results
 
 | | | |
