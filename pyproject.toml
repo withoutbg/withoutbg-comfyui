@@ -11,7 +11,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-dependencies = ["withoutbg>=1.5.0"]
+dependencies = ["withoutbg>=1.5.1"]
 
 [dependency-groups]
 dev = ["pytest>=8", "torch", "ruff>=0.6"]

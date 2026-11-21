@@ -1,1 +1,1 @@
-withoutbg>=1.5.0
+withoutbg>=1.5.1

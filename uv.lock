@@ -2156,7 +2156,7 @@ wheels = [
 
 [[package]]
 name = "withoutbg"
-version = "1.5.0"
+version = "1.5.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -2172,9 +2172,9 @@ dependencies = [
     { name = "requests" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c9/b6/166bbb8cf8b73b42d7ecb3fa125f754a8e49e36b714718f5d14c09eff26b/withoutbg-1.5.0.tar.gz", hash = "sha256:0ee34f6f16fc9a670eff335cd0f1d2ae43bdedc38f3e706918fd130870f10c34", size = 310534, upload-time = "2026-11-04T19:01:45.781Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8e/10/353fa85ce566be6e2c675db1e6cba15e7a937e47654422ad31cfe9e435d3/withoutbg-1.5.1.tar.gz", hash = "sha256:1bd4ae8c46f7601fea837c6986195e00d1117e94c52ab0f32b2c04a7449dcdb6", size = 313498, upload-time = "2026-11-21T16:14:30.689Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/84/66/0ac8479225cd5bbe9ab7422a080ee3c2fb2237e84777c8e9276eb5ee4a58/withoutbg-1.5.0-py3-none-any.whl", hash = "sha256:d46d3445471d06a6df8abb6fdda42995a14f1c4cc493c69b450f95f97b898678", size = 38148, upload-time = "2026-11-04T19:01:44.359Z" },
+    { url = "https://files.pythonhosted.org/packages/2f/95/49f3751a42b341a2e0e3b8bcff9382acfc7b6bacfd1d2d3c3b1abd0beff6/withoutbg-1.5.1-py3-none-any.whl", hash = "sha256:58ab4db6bff3778efcd880aa715b3e3fda56ad41f15c457e886b69f472848a32", size = 39798, upload-time = "2026-11-21T16:14:29.067Z" },
 ]
 
 [[package]]
@@ -2194,7 +2194,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "withoutbg", specifier = ">=1.5.0" }]
+requires-dist = [{ name = "withoutbg", specifier = ">=1.5.1" }]
 
 [package.metadata.requires-dev]
 dev = [
