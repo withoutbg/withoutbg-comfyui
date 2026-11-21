@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib.util
 import logging
 import os
 import platform
@@ -71,16 +72,20 @@ def pick_providers(device: str = "auto") -> list[str]:
         import onnxruntime as ort
     except ImportError:
         return [_CPU]
-    available = set(ort.get_available_providers())
-    chosen = [
-        p for p in ("CUDAExecutionProvider", "DmlExecutionProvider") if p in available
-    ]
-    if "CUDAExecutionProvider" in chosen and hasattr(ort, "preload_dlls"):
+    if "CUDAExecutionProvider" not in ort.get_available_providers():
+        return [_CPU]
+    if importlib.util.find_spec("onnx") is None:
+        log.info(
+            "withoutBG: CUDA is available but the 'onnx' package is missing, "
+            "using CPU. Install it with: pip install onnx"
+        )
+        return [_CPU]
+    if hasattr(ort, "preload_dlls"):
         try:  # reuse the CUDA / cuDNN libraries that ComfyUI's torch ships
             ort.preload_dlls()
         except Exception as e:  # best effort
             log.debug("withoutBG: onnxruntime.preload_dlls failed: %s", e)
-    return chosen[:1] or [_CPU]
+    return ["CUDAExecutionProvider"]
 
 
 def _get_open_weights(device: str = "auto"):

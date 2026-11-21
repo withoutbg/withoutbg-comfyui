@@ -53,7 +53,7 @@ Open **Workflow → Browse Templates → withoutbg-comfyui**:
 |---|---|
 | `image` | IMAGE, any batch size |
 | `engine` | `open_weights` (default, local, free) or `pro` (Cloud API) |
-| `device` | `auto` (default) uses an NVIDIA GPU or DirectML when available, else CPU. `cpu` forces CPU. Open weights only |
+| `device` | `auto` (default) uses an NVIDIA GPU when `onnxruntime-gpu` and `onnx` are installed (see GPU), else CPU. `cpu` forces CPU. Open weights only |
 | `background` | `alpha` (default): RGBA with transparency. `white`, `black` or `color`: 3-channel RGB on a solid colour, for nodes that expect 3 channels (VAE Encode, upscalers) |
 | `color` | Hex colour such as `#00FF00`, used when `background` is `color` |
 
@@ -70,13 +70,15 @@ The first run downloads the model from Hugging Face (`withoutbg/withoutbg-openwe
 
 ### GPU
 
-`device = auto` picks an NVIDIA GPU when ONNX Runtime can see one. The default `onnxruntime` package is CPU only, so swap it in ComfyUI's Python:
+The default install runs on CPU. For an NVIDIA GPU, swap the ONNX Runtime package in ComfyUI's Python and add `onnx` (the node uses it to prepare the model for CUDA, nothing is written to disk):
 
 ```bash
-uv pip uninstall onnxruntime && uv pip install onnxruntime-gpu
+uv pip uninstall onnxruntime && uv pip install onnxruntime-gpu onnx
 ```
 
-When the GPU is used, the ComfyUI console prints `withoutBG: open weights running on CUDAExecutionProvider`. If the GPU fails at run time the node logs one warning and continues on CPU. Without a GPU build the node runs on CPU as before.
+Then `device = auto` uses the GPU. On an RTX 2070 SUPER, 12 mixed test photos averaged about 1.7 s on the GPU against about 6 s on CPU, with the alpha matching the CPU result to within 1/255.
+
+When the GPU is used, the ComfyUI console prints `withoutBG: open weights running on CUDAExecutionProvider`. If the GPU fails at run time the node logs one warning and continues on CPU. Without the GPU packages the node runs on CPU as before.
 
 To use files you downloaded yourself, set `WITHOUTBG_MODEL_PATH` to the `.onnx` file; the other bundle files must sit in the same folder.
 

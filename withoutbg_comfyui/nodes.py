@@ -61,8 +61,8 @@ class WithoutBGRemoveBackground:
                     list(backends._DEVICES),
                     {
                         "default": "auto",
-                        "tooltip": "open_weights only. auto uses an NVIDIA GPU "
-                        "(onnxruntime-gpu) or DirectML when available, else CPU.",
+                        "tooltip": "open_weights only. auto uses an NVIDIA GPU when "
+                        "onnxruntime-gpu and onnx are installed, else CPU.",
                     },
                 ),
                 "background": (
