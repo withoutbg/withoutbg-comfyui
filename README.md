@@ -4,6 +4,8 @@
 
 ComfyUI node for [withoutBG](https://withoutbg.com?utm_source=github&utm_medium=readme&utm_campaign=open-weights-v4&utm_content=withoutbg-comfyui-home) background removal. Run the open weights model locally (free) or opt in to Pro through the Cloud API.
 
+![Animation: a photo goes through the withoutBG Remove Background node in ComfyUI and comes out as a cutout, then the output switches to the alpha mask; the second photo uses the Pro engine and zooms in on the hair](https://raw.githubusercontent.com/withoutbg/withoutbg-comfyui/main/images/demo.gif)
+
 ![withoutBG Remove Background in a ComfyUI workflow: Load Image, the node, and Preview Image and Preview Mask outputs](https://raw.githubusercontent.com/withoutbg/withoutbg-comfyui/main/images/comfyui.png)
 
 ## See the results
