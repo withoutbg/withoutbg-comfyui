@@ -117,6 +117,21 @@ Set the variable **before ComfyUI starts**. How depends on how you run it:
 
 Avoid `launchctl setenv` on macOS: it exposes the key to every app until you reboot. If the key is missing, the node stops with a clear error before sending anything, so no credit is spent.
 
+## Network access and privacy
+
+What this node does on the network, and nothing else:
+
+| When | Where | What |
+|---|---|---|
+| First open weights run only | Hugging Face, repo `withoutbg/withoutbg-openweights-onnx` | Downloads 4 model files (about 1.5 GB) into the Hugging Face cache. Later runs are offline. Skipped if `WITHOUTBG_MODEL_PATH` is set. |
+| Only when Pro is selected and `WITHOUTBG_API_KEY` is set | `api.withoutbg.com` | Sends the image for processing. Each image costs 1 credit. |
+
+- No telemetry, no analytics, no other hosts.
+- Open weights never upload images.
+- The node does not run shell commands, install packages at run time, or execute downloaded code. Model files are ONNX data loaded by `onnxruntime`.
+- The only dependency it declares is the open-source [`withoutbg`](https://pypi.org/project/withoutbg/) package.
+- The Cloud API request carries a `User-Agent` like `withoutbg-comfyui/0.2.0 (ComfyUI x.y; platform-arch)`, with no user or machine identifiers.
+
 ## Troubleshooting
 
 - **OpenCV conflict:** `withoutbg` depends on `opencv-python-headless`. If ComfyUI already has `opencv-python`, the installer may add both. If `import cv2` breaks, reinstall one: `uv pip uninstall opencv-python opencv-python-headless && uv pip install opencv-python-headless` (or the same with `pip`, adding `-y` to uninstall).
